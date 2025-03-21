@@ -1,0 +1,9 @@
+{
+	"addons": [{
+		"id": "markdown_tools",
+		"description": "Markdown tools.",
+		"path": ".",
+		"version": "0.0.1",
+		"dependencies": { "language_md": {} }
+	}]
+}
