@@ -1,4 +1,5 @@
 {
+	"$schema": "https://raw.githubusercontent.com/lite-xl/lite-xl-plugin-manager/refs/heads/master/lpm.json",
 	"addons": [{
 		"id": "markdown_tools",
 		"description": "Markdown tools.",
