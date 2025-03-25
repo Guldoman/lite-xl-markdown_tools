@@ -7,12 +7,6 @@ local Doc = require "core.doc"
 ---@type Table
 local Table = require "plugins.markdown_tools.table"
 
--- TODO: Write tests before progressing to actually formatting
-
---       Also for formatting, make a formatting "planner" function
---       that returns how the indexes change, which is then fed
---       to the actual formatter function that also handles doc carets
-
 get_table_info_tests:add_test("Surrounded table", function()
 	local doc = Doc()
 	doc:text_input([[
