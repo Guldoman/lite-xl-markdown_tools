@@ -9,7 +9,7 @@ local is_table_regex = assert(regex.compile([[^\s*(?:(\|).*\|\s*|[^|].*(\|).*)\s
 local is_table_header_separator = assert(regex.compile([[^(?=[^|]*\|)\s*:?\-*(?:\|\s*:?\-+:?\s*)+\|?\s*$]]))
 
 ---@param str string
-local function get_table_line_info(str)
+function Table.get_table_line_info(str)
 	local match = is_table_regex:match(str)
 	if not match then return end
 	local surrounded = match == "|"
@@ -36,7 +36,7 @@ end
 ---@param line integer
 ---@return false|table
 function Table.is_table(doc, line)
-	local result = get_table_line_info(doc.lines[line])
+	local result = Table.get_table_line_info(doc.lines[line])
 	if not result then return false end
 
 	local surrounded = result.surrounded
@@ -51,7 +51,7 @@ function Table.is_table(doc, line)
 
 	-- Find initial table line
 	for i=math.min(#doc.lines, line-1),1,-1 do
-		result = get_table_line_info(doc.lines[i])
+		result = Table.get_table_line_info(doc.lines[i])
 		if not result then break end
 		if result.surrounded ~= surrounded
 		   or result.nfields ~= nfields then
@@ -65,7 +65,7 @@ function Table.is_table(doc, line)
 	end
 
 	-- Check that the second table line is an header separator
-	result = get_table_line_info(doc.lines[line1 + 1])
+	result = Table.get_table_line_info(doc.lines[line1 + 1])
 	if not result then return false end
 	if result.surrounded ~= surrounded
 	   or result.nfields ~= nfields
@@ -75,7 +75,7 @@ function Table.is_table(doc, line)
 
 	-- Find final table line
 	for i=line+1,#doc.lines do
-		result = get_table_line_info(doc.lines[i])
+		result = Table.get_table_line_info(doc.lines[i])
 		if not result then break end
 		if result.surrounded ~= surrounded
 		   or result.nfields ~= nfields then
