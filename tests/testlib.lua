@@ -119,7 +119,7 @@ function TestLib:get_indented(str, level)
 	for s in string.gmatch(str, "(.*)\n?") do
 		table.insert(res, string.rep(self.indent_string, level) .. s)
 	end
-	return table.concat(res)
+	return table.concat(res, "\n")
 end
 
 function TestLib:get_test_message(test)
