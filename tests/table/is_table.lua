@@ -21,10 +21,10 @@ this is not part of the table
 
 ]])
 	for i=1,4 do
-		assert(Table.is_table(doc, i) == false)
+		assert(Table.is_table(doc.lines, i) == false)
 	end
 	for i=5,8 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 5)
 		assert(res.line2 == 8)
@@ -32,7 +32,7 @@ this is not part of the table
 		assert(res.n_cols == 3)
 	end
 	for i=9,10 do
-		assert(Table.is_table(doc, i) == false)
+		assert(Table.is_table(doc.lines, i) == false)
 	end
 	return true
 end)
@@ -46,7 +46,7 @@ is_table_tests:add_test("Table surrounded", function()
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -65,7 +65,7 @@ c1 |c2 |c3
 c1 |c2 |c3
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -84,7 +84,7 @@ is_table_tests:add_test("Table with one column", function()
 |c1 |
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -103,7 +103,7 @@ c1
 c1
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -122,7 +122,7 @@ H1|H2|H3|
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		assert(Table.is_table(doc, i) == false)
+		assert(Table.is_table(doc.lines, i) == false)
 	end
 
 	doc = Doc()
@@ -133,7 +133,7 @@ H1|H2|H3|
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		assert(Table.is_table(doc, i) == false)
+		assert(Table.is_table(doc.lines, i) == false)
 	end
 	return true
 end)
@@ -147,7 +147,7 @@ is_table_tests:add_test("Table with wrong number of header fields", function()
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		assert(Table.is_table(doc, i) == false)
+		assert(Table.is_table(doc.lines, i) == false)
 	end
 
 	doc = Doc()
@@ -158,7 +158,7 @@ is_table_tests:add_test("Table with wrong number of header fields", function()
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		assert(Table.is_table(doc, i) == false)
+		assert(Table.is_table(doc.lines, i) == false)
 	end
 	return true
 end)
@@ -172,7 +172,7 @@ is_table_tests:add_test("Table with broken header separator", function()
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		assert(Table.is_table(doc, i) == false)
+		assert(Table.is_table(doc.lines, i) == false)
 	end
 
 	doc = Doc()
@@ -183,7 +183,7 @@ is_table_tests:add_test("Table with broken header separator", function()
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		assert(Table.is_table(doc, i) == false)
+		assert(Table.is_table(doc.lines, i) == false)
 	end
 
 	doc = Doc()
@@ -194,7 +194,7 @@ is_table_tests:add_test("Table with broken header separator", function()
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		assert(Table.is_table(doc, i) == false)
+		assert(Table.is_table(doc.lines, i) == false)
 	end
 	return true
 end)
@@ -208,7 +208,7 @@ is_table_tests:add_test("Table surrounded with leading whitespace", function()
   |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -224,7 +224,7 @@ is_table_tests:add_test("Table surrounded with leading whitespace", function()
 	|c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -240,7 +240,7 @@ is_table_tests:add_test("Table surrounded with leading whitespace", function()
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -259,7 +259,7 @@ is_table_tests:add_test("Table surrounded with trailing whitespace", function()
 |c1 |c2 |c3 |  
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -275,7 +275,7 @@ is_table_tests:add_test("Table surrounded with trailing whitespace", function()
 |c1 |c2 |c3 |	
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -291,7 +291,7 @@ is_table_tests:add_test("Table surrounded with trailing whitespace", function()
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -310,7 +310,7 @@ is_table_tests:add_test("Table surrounded with alignment", function()
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -329,7 +329,7 @@ c1 |c2 |c3
 c1 |c2 |c3
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -348,7 +348,7 @@ is_table_tests:add_test("Table surrounded with bad alignment", function()
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res == false)
 	end
 
@@ -360,7 +360,7 @@ is_table_tests:add_test("Table surrounded with bad alignment", function()
 |c1 |c2 |c3 |
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res == false)
 	end
 	return true
@@ -375,7 +375,7 @@ c1 |c2 |c3
 c1 |c2 |c3
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res == false)
 	end
 
@@ -387,7 +387,7 @@ c1 |c2 |c3
 c1 |c2 |c3
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res == false)
 	end
 	return true
@@ -403,7 +403,7 @@ is_table_tests:add_test("Table surrounded with escaped pipes",
 |c1 |c2 |c3\| |
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
@@ -423,7 +423,7 @@ c1 |c2\| |c3
 c1 |c2 |c3\|
 ]])
 	for i=1,4 do
-		local res = Table.is_table(doc, i)
+		local res = Table.is_table(doc.lines, i)
 		assert(res)
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)

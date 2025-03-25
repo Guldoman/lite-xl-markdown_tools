@@ -21,8 +21,8 @@ get_table_info_tests:add_test("Surrounded table", function()
 |cell4|cell5|cell6|
 |cell7|cell8|cell9|
 ]])
-	local t_loc = assert(Table.is_table(doc, 1))
-	local t_info = assert(Table.get_table_info(doc, t_loc))
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
 
 	-- t_info should keep every field of t_loc
 	for k, v in pairs(t_loc) do
@@ -61,8 +61,8 @@ cell1|cell2|cell3
 cell4|cell5|cell6
 cell7|cell8|cell9
 ]])
-	local t_loc = assert(Table.is_table(doc, 1))
-	local t_info = assert(Table.get_table_info(doc, t_loc))
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
 
 	-- t_info should keep every field of t_loc
 	for k, v in pairs(t_loc) do
@@ -101,8 +101,8 @@ get_table_info_tests:add_test("Surrounded table with leading spaces", function()
    |5|7|9|
   |4|6|8|
 ]])
-	local t_loc = assert(Table.is_table(doc, 1))
-	local t_info = assert(Table.get_table_info(doc, t_loc))
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
 
 	-- t_info should keep every field of t_loc
 	for k, v in pairs(t_loc) do
@@ -140,8 +140,8 @@ get_table_info_tests:add_test("Not surrounded table with leading spaces", functi
    1|6|8
     1|7|9
 ]])
-	local t_loc = assert(Table.is_table(doc, 1))
-	local t_info = assert(Table.get_table_info(doc, t_loc))
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
 
 	-- t_info should keep every field of t_loc
 	for k, v in pairs(t_loc) do
@@ -185,8 +185,8 @@ get_table_info_tests:add_test("Surrounded table with escaped pipes",
 |ce\|\|4|ce\|\|5|ce\|\|6|
 |ce\|\|7|ce\|\|8|ce\|\|9|
 ]])
-	local t_loc = assert(Table.is_table(doc, 1))
-	local t_info = assert(Table.get_table_info(doc, t_loc))
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
 
 	-- t_info should keep every field of t_loc
 	for k, v in pairs(t_loc) do
@@ -227,8 +227,8 @@ ce\|\|1|ce\|\|2|ce\|\|3
 ce\|\|4|ce\|\|5|ce\|\|6
 ce\|\|7|ce\|\|8|ce\|\|9
 ]])
-	local t_loc = assert(Table.is_table(doc, 1))
-	local t_info = assert(Table.get_table_info(doc, t_loc))
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
 
 	-- t_info should keep every field of t_loc
 	for k, v in pairs(t_loc) do
@@ -267,8 +267,8 @@ get_table_info_tests:add_test("Surrounded table alignments", function()
 |cell4|cell5|cell6|cell4|
 |cell7|cell8|cell9|cell7|
 ]])
-	local t_loc = assert(Table.is_table(doc, 1))
-	local t_info = assert(Table.get_table_info(doc, t_loc))
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
 
 	-- t_info should keep every field of t_loc
 	for k, v in pairs(t_loc) do
@@ -290,8 +290,8 @@ cell1|cell2|cell3|cell1
 cell4|cell5|cell6|cell4
 cell7|cell8|cell9|cell7
 ]])
-	local t_loc = assert(Table.is_table(doc, 1))
-	local t_info = assert(Table.get_table_info(doc, t_loc))
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
 
 	-- t_info should keep every field of t_loc
 	for k, v in pairs(t_loc) do

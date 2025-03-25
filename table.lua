@@ -32,11 +32,11 @@ end
 
 ---Check if the specified line is part of a table.
 ---
----@param doc core.doc
+---@param lines string[]
 ---@param line integer
 ---@return false|table
-function Table.is_table(doc, line)
-	local result = Table.get_table_line_info(doc.lines[line])
+function Table.is_table(lines, line)
+	local result = Table.get_table_line_info(lines[line])
 	if not result then return false end
 
 	local surrounded = result.surrounded
@@ -44,14 +44,14 @@ function Table.is_table(doc, line)
 	local line1 = line
 	local line2 = line
 
-	if #doc.lines < 3 then
+	if #lines < 3 then
 		-- A table needs at least three lines
 		return false
 	end
 
 	-- Find initial table line
-	for i=math.min(#doc.lines, line-1),1,-1 do
-		result = Table.get_table_line_info(doc.lines[i])
+	for i=math.min(#lines, line - 1),1,-1 do
+		result = Table.get_table_line_info(lines[i])
 		if not result then break end
 		if result.surrounded ~= surrounded
 		   or result.n_cols ~= n_cols then
@@ -59,13 +59,13 @@ function Table.is_table(doc, line)
 		end
 		line1 = i
 	end
-	if line1 > #doc.lines-2 then
+	if line1 > #lines - 2 then
 		-- There is not enough space for a table
 		return false
 	end
 
 	-- Check that the second table line is an header separator
-	result = Table.get_table_line_info(doc.lines[line1 + 1])
+	result = Table.get_table_line_info(lines[line1 + 1])
 	if not result then return false end
 	if result.surrounded ~= surrounded
 	   or result.n_cols ~= n_cols
@@ -74,8 +74,8 @@ function Table.is_table(doc, line)
 	end
 
 	-- Find final table line
-	for i=line+1,#doc.lines do
-		result = Table.get_table_line_info(doc.lines[i])
+	for i=line+1,#lines do
+		result = Table.get_table_line_info(lines[i])
 		if not result then break end
 		if result.surrounded ~= surrounded
 		   or result.n_cols ~= n_cols then
@@ -105,14 +105,14 @@ function Table.get_alignment(str)
 	return false
 end
 
-function Table.get_table_info(doc, table_location)
+function Table.get_table_info(lines, table_location)
 	local line1, line2 = table_location.line1, table_location.line2
 	local surrounded = table_location.surrounded
 	local max_lens = { }
 	local initial_split_index = surrounded and 2 or 1
 	local final_split_index = initial_split_index + table_location.n_cols - 1
 
-	local alignment_strings = Utils.split(doc.lines[line1 + 1], "|")
+	local alignment_strings = Utils.split(lines[line1 + 1], "|")
 	local alignments = { }
 	for i=initial_split_index, final_split_index do
 		local alignment = Table.get_alignment(alignment_strings[i])
@@ -123,7 +123,7 @@ function Table.get_table_info(doc, table_location)
 	local rows = { }
 	for i=line1, line2 do
 		local row = { }
-		local data, pipe_positions = Utils.split(doc.lines[i], "|")
+		local data, pipe_positions = Utils.split(lines[i], "|")
 		for j=initial_split_index, final_split_index do
 			local col = j - initial_split_index + 1
 			local text, trim_start, trim_end = Utils.trim(data[j])
