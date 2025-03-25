@@ -113,6 +113,19 @@ c1
 	return true
 end)
 
+is_table_tests:add_test("Table without any data rows", function()
+	local doc = Doc()
+	doc:text_input([[
+|H1|H2|H3|
+|---|---|---|
+]])
+	for i=1,2 do
+		local res = Table.is_table(doc.lines, i)
+		assert(res == false) -- TODO: check the reason
+	end
+	return true
+end)
+
 is_table_tests:add_test("Table with broken header", function()
 	local doc = Doc()
 	doc:text_input([[
