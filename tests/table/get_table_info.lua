@@ -39,8 +39,8 @@ get_table_info_tests:add_test("Surrounded table", function()
 				assert(cell.text == string.format("-----", n))
 			end
 			assert(cell.cell_start == (j-1) * (#("cell0") + 1) + 2)
-			assert(cell.trim_start == "")
-			assert(cell.trim_end == "")
+			assert(cell.trim_start == 0)
+			assert(cell.trim_end == 0)
 		end
 	end
 	assert(n == 9 + 1, "Wrong number of cells")
@@ -79,8 +79,8 @@ cell7|cell8|cell9
 				assert(cell.text == string.format("-----"))
 			end
 			assert(cell.cell_start == (j-1) * (#("cell0") + 1) + 1)
-			assert(cell.trim_start == "")
-			assert(cell.trim_end == "")
+			assert(cell.trim_start == 0)
+			assert(cell.trim_end == 0)
 		end
 	end
 	assert(n == 9 + 1, "Wrong number of cells")
@@ -118,8 +118,8 @@ get_table_info_tests:add_test("Surrounded table with leading spaces", function()
 			else
 				assert(cell.text == string.format("-----"))
 			end
-			assert(cell.trim_start == "")
-			assert(cell.trim_end == "")
+			assert(cell.trim_start == 0)
+			assert(cell.trim_end == 0)
 		end
 	end
 	assert(n == 9 + 1, "Wrong number of cells")
@@ -158,11 +158,11 @@ get_table_info_tests:add_test("Not surrounded table with leading spaces", functi
 				assert(cell.text == string.format("-----"))
 			end
 			if j ~= 1 then
-				assert(cell.trim_start == "")
+				assert(cell.trim_start == 0)
 			else
-				assert(cell.trim_start == string.rep(" ", i))
+				assert(cell.trim_start == i)
 			end
-			assert(cell.trim_end == "")
+			assert(cell.trim_end == 0)
 		end
 	end
 	assert(n == 9 + 1, "Wrong number of cells")
@@ -203,8 +203,8 @@ get_table_info_tests:add_test("Surrounded table with escaped pipes",
 				assert(cell.text == string.format("-----", n))
 			end
 			assert(cell.cell_start == (j-1) * (#([[ce\|\|0]]) + 1) + 2)
-			assert(cell.trim_start == "")
-			assert(cell.trim_end == "")
+			assert(cell.trim_start == 0)
+			assert(cell.trim_end == 0)
 		end
 	end
 	assert(n == 9 + 1, "Wrong number of cells")
@@ -245,8 +245,8 @@ ce\|\|7|ce\|\|8|ce\|\|9
 				assert(cell.text == string.format("-----"))
 			end
 			assert(cell.cell_start == (j-1) * (#([[ce\|\|0]]) + 1) + 1)
-			assert(cell.trim_start == "")
-			assert(cell.trim_end == "")
+			assert(cell.trim_start == 0)
+			assert(cell.trim_end == 0)
 		end
 	end
 	assert(n == 9 + 1, "Wrong number of cells")

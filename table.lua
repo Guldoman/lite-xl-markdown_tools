@@ -136,8 +136,8 @@ function Table.get_table_info(doc, table_location)
 			local cell = {
 				cell_start = cell_start,
 				text = text,
-				trim_start = trim_start,
-				trim_end = trim_end,
+				trim_start = #trim_start,
+				trim_end = #trim_end,
 			}
 			-- Skip header separation line
 			if i ~= line1 + 1 then
