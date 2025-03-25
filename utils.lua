@@ -36,7 +36,7 @@ function Utils.format(str, alignment, size, pad_str)
 		left = math.floor(middle)
 		right = math.ceil(middle)
 	end
-	return string.format("%s%s%s", string.rep(pad_str, left), str, string.rep(pad_str, right))
+	return string.format("%s%s%s", string.rep(pad_str, left), str, string.rep(pad_str, right)), left, right
 end
 
 return Utils
