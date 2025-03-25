@@ -107,8 +107,9 @@ end
 
 function Table.get_table_info(doc, table_location)
 	local line1, line2 = table_location.line1, table_location.line2
+	local surrounded = table_location.surrounded
 	local max_lens = { }
-	local initial_split_index = table_location.surrounded and 2 or 1
+	local initial_split_index = surrounded and 2 or 1
 	local final_split_index = initial_split_index + table_location.nfields - 1
 
 	local alignment_strings = Utils.split(doc.lines[line1 + 1], "|")
@@ -121,26 +122,30 @@ function Table.get_table_info(doc, table_location)
 
 	local rows = { }
 	for i=line1, line2 do
-		-- Skip header separation line
-		if i == line1 + 1 then
-			goto skip
-		end
 		local row = { }
 		local data, pipe_positions = Utils.split(doc.lines[i], "|")
 		for j=initial_split_index, final_split_index do
 			local col = j - initial_split_index + 1
 			local text, trim_start, trim_end = Utils.trim(data[j])
+			local cell_start = 1
+			if surrounded then
+				cell_start = pipe_positions[j - initial_split_index + 1] + 1
+			else
+				cell_start = col == 1 and 1 or pipe_positions[col - 1] + 1
+			end
 			local cell = {
-				pipe_position = pipe_positions[j],
+				cell_start = cell_start,
 				text = text,
 				trim_start = trim_start,
 				trim_end = trim_end,
 			}
-			max_lens[col] = math.max(max_lens[col] or 0, string.ulen(cell.text))
+			-- Skip header separation line
+			if i ~= line1 + 1 then
+				max_lens[col] = math.max(max_lens[col] or 0, string.ulen(cell.text))
+			end
 			table.insert(row, cell)
 		end
 		table.insert(rows, row)
-		::skip::
 	end
 	return {
 		rows = rows,
