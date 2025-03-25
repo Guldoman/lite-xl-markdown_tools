@@ -13,14 +13,14 @@ function Table.get_table_line_info(str)
 	local match = is_table_regex:match(str)
 	if not match then return end
 	local surrounded = match == "|"
-	local nfields = surrounded and -1 or 1
+	local n_cols = surrounded and -1 or 1
 	for _ in string.gmatch(str, "|") do
-		nfields = nfields + 1
+		n_cols = n_cols + 1
 	end
 	local is_header_separator = is_table_header_separator:match(str)
 	return {
 		surrounded = surrounded,
-		nfields = nfields,
+		n_cols = n_cols,
 		is_header_separator = not not is_header_separator,
 	}
 end
@@ -40,7 +40,7 @@ function Table.is_table(doc, line)
 	if not result then return false end
 
 	local surrounded = result.surrounded
-	local nfields = result.nfields
+	local n_cols = result.n_cols
 	local line1 = line
 	local line2 = line
 
@@ -54,7 +54,7 @@ function Table.is_table(doc, line)
 		result = Table.get_table_line_info(doc.lines[i])
 		if not result then break end
 		if result.surrounded ~= surrounded
-		   or result.nfields ~= nfields then
+		   or result.n_cols ~= n_cols then
 			break
 		end
 		line1 = i
@@ -68,7 +68,7 @@ function Table.is_table(doc, line)
 	result = Table.get_table_line_info(doc.lines[line1 + 1])
 	if not result then return false end
 	if result.surrounded ~= surrounded
-	   or result.nfields ~= nfields
+	   or result.n_cols ~= n_cols
 	   or not result.is_header_separator then
 		return false
 	end
@@ -78,7 +78,7 @@ function Table.is_table(doc, line)
 		result = Table.get_table_line_info(doc.lines[i])
 		if not result then break end
 		if result.surrounded ~= surrounded
-		   or result.nfields ~= nfields then
+		   or result.n_cols ~= n_cols then
 			break
 		end
 		line2 = i
@@ -88,7 +88,7 @@ function Table.is_table(doc, line)
 		line1 = line1,
 		line2 = line2,
 		surrounded = surrounded,
-		nfields = nfields,
+		n_cols = n_cols,
 	}
 end
 
@@ -110,7 +110,7 @@ function Table.get_table_info(doc, table_location)
 	local surrounded = table_location.surrounded
 	local max_lens = { }
 	local initial_split_index = surrounded and 2 or 1
-	local final_split_index = initial_split_index + table_location.nfields - 1
+	local final_split_index = initial_split_index + table_location.n_cols - 1
 
 	local alignment_strings = Utils.split(doc.lines[line1 + 1], "|")
 	local alignments = { }
@@ -155,7 +155,7 @@ function Table.get_table_info(doc, table_location)
 		line1 = table_location.line1,
 		line2 = table_location.line2,
 		surrounded = table_location.surrounded,
-		nfields = table_location.nfields,
+		n_cols = table_location.n_cols,
 	}
 end
 

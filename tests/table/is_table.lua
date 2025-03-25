@@ -29,7 +29,7 @@ this is not part of the table
 		assert(res.line1 == 5)
 		assert(res.line2 == 8)
 		assert(res.surrounded == true)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 	for i=9,10 do
 		assert(Table.is_table(doc, i) == false)
@@ -51,7 +51,7 @@ is_table_tests:add_test("Table surrounded", function()
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == true)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 	return true
 end)
@@ -70,7 +70,7 @@ c1 |c2 |c3
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == false)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 	return true
 end)
@@ -89,7 +89,7 @@ is_table_tests:add_test("Table with one column", function()
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == true)
-		assert(res.nfields == 1)
+		assert(res.n_cols == 1)
 	end
 	return true
 end)
@@ -108,7 +108,7 @@ c1
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == false)
-		assert(res.nfields == 1)
+		assert(res.n_cols == 1)
 	end
 	return true
 end)
@@ -213,7 +213,7 @@ is_table_tests:add_test("Table surrounded with leading whitespace", function()
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == true)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 
 	doc = Doc()
@@ -229,7 +229,7 @@ is_table_tests:add_test("Table surrounded with leading whitespace", function()
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == true)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 
 	doc = Doc()
@@ -245,7 +245,7 @@ is_table_tests:add_test("Table surrounded with leading whitespace", function()
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == true)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 	return true
 end)
@@ -264,7 +264,7 @@ is_table_tests:add_test("Table surrounded with trailing whitespace", function()
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == true)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 
 	doc = Doc()
@@ -280,7 +280,7 @@ is_table_tests:add_test("Table surrounded with trailing whitespace", function()
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == true)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 
 	doc = Doc()
@@ -296,7 +296,7 @@ is_table_tests:add_test("Table surrounded with trailing whitespace", function()
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == true)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 	return true
 end)
@@ -315,7 +315,7 @@ is_table_tests:add_test("Table surrounded with alignment", function()
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == true)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 	return true
 end)
@@ -334,7 +334,7 @@ c1 |c2 |c3
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == false)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 	return true
 end)
@@ -408,7 +408,7 @@ is_table_tests:add_test("Table surrounded with escaped pipes",
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == true)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 	return true
 end)
@@ -428,7 +428,7 @@ c1 |c2 |c3\|
 		assert(res.line1 == 1)
 		assert(res.line2 == 4)
 		assert(res.surrounded == false)
-		assert(res.nfields == 3)
+		assert(res.n_cols == 3)
 	end
 	return true
 end)
