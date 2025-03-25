@@ -35,9 +35,12 @@ end
 ---@param lines string[]
 ---@param line integer
 ---@return false|table
+---@return string?
 function Table.is_table(lines, line)
 	local result = Table.get_table_line_info(lines[line])
-	if not result then return false end
+	if not result then
+		return false, "Specified line doesn't look like a table row"
+	end
 
 	local surrounded = result.surrounded
 	local n_cols = result.n_cols
@@ -45,8 +48,7 @@ function Table.is_table(lines, line)
 	local line2 = line
 
 	if #lines < 3 then
-		-- A table needs at least three lines
-		return false
+		return false, "A table needs at least three lines"
 	end
 
 	-- Find initial table line
@@ -60,8 +62,7 @@ function Table.is_table(lines, line)
 		line1 = i
 	end
 	if line1 > #lines - 2 then
-		-- There is not enough space for a table
-		return false
+		return false, "There is not enough space for a table"
 	end
 
 	-- Check that the second table line is an header separator
@@ -70,7 +71,7 @@ function Table.is_table(lines, line)
 	if result.surrounded ~= surrounded
 	   or result.n_cols ~= n_cols
 	   or not result.is_header_separator then
-		return false
+		return false, "Second line is not an header separator"
 	end
 
 	-- Find final table line
@@ -82,6 +83,9 @@ function Table.is_table(lines, line)
 			break
 		end
 		line2 = i
+	end
+	if line2 < line1 + 2 then
+		return false, "Table has no data rows"
 	end
 
 	return {
