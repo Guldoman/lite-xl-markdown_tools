@@ -27,7 +27,7 @@ function Utils.format(str, alignment, size, pad_str)
 	local len = #str
 	assert(size >= len)
 	local left, right = 0, 0
-	if alignment == "left" then
+	if alignment == "left" or alignment == "left-explicit" then
 		right = size - len
 	elseif alignment == "right" then
 		left = size - len
