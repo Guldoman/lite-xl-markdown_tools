@@ -6,7 +6,7 @@ local Table = {}
 -- TODO: handle escaped pipes
 
 local is_table_regex = assert(regex.compile([[^\s*(?:(\|).*\|\s*|[^|].*(\|).*)\s*$]]))
-local is_table_header_separator = assert(regex.compile([[^(?=[^|]*\|)\s*:?\-*(?:\|\s*:?\-+:?\s*)+\|?\s*$]]))
+local is_table_header_separator = assert(regex.compile([[^(?=[^|]*\|)\s*:?\-*:?(?:\|\s*:?\-+:?\s*)+\|?\s*$]]))
 
 ---@param str string
 function Table.get_table_line_info(str)
