@@ -52,7 +52,7 @@ function Table.is_table(lines, line)
 	end
 
 	-- Find initial table line
-	for i=math.min(#lines, line - 1),1,-1 do
+	for i=math.max(1, line - 1),1,-1 do
 		result = Table.get_table_line_info(lines[i])
 		if not result then break end
 		if result.surrounded ~= surrounded
