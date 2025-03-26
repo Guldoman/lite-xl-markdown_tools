@@ -67,11 +67,15 @@ function Table.is_table(lines, line)
 
 	-- Check that the second table line is an header separator
 	result = Table.get_table_line_info(lines[line1 + 1])
-	if not result then return false end
-	if result.surrounded ~= surrounded
-	   or result.n_cols ~= n_cols
-	   or not result.is_header_separator then
+	if not result then
+		return false, "Invalid header separator line"
+	end
+	if not result.is_header_separator then
 		return false, "Second line is not an header separator"
+	end
+	if result.surrounded ~= surrounded
+	   or result.n_cols ~= n_cols then
+		return false, "Header separator doesn't match the table"
 	end
 
 	-- Find final table line
