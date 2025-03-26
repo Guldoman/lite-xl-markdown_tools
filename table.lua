@@ -4,9 +4,9 @@ local Utils = require "plugins.markdown_tools.utils"
 local Table = {}
 
 -- TODO: handle escaped pipes
-
+-- TODO: make tests for the regexes
 local is_table_regex = assert(regex.compile([[^\s*(?:(\|).*\|\s*|[^|].*(\|).*)\s*$]]))
-local is_table_header_separator = assert(regex.compile([[^(?=[^|]*\|)\s*:?\-*:?(?:\|\s*:?\-+:?\s*)+\|?\s*$]]))
+local is_table_header_separator = assert(regex.compile([[^(?=[^|]*\|)\s*:?\-*:?\s*(?:\|\s*:?\-+:?\s*)+\|?\s*$]]))
 
 Table.minimum_width = 3
 Table.cell_margin = 1

@@ -400,6 +400,22 @@ c1 |c2 |c3
 		assert(res.surrounded == false)
 		assert(res.n_cols == 3)
 	end
+
+	doc = Doc()
+	doc:text_input([[
+H1|H2|H3
+ :-: | --: | :-- 
+c1 |c2 |c3
+c1 |c2 |c3
+]])
+	for i=1,4 do
+		local res, reason = Table.is_table(doc.lines, i)
+		assert(res, reason)
+		assert(res.line1 == 1)
+		assert(res.line2 == 4)
+		assert(res.surrounded == false)
+		assert(res.n_cols == 3)
+	end
 	return true
 end)
 
