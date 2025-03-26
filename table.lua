@@ -8,6 +8,9 @@ local Table = {}
 local is_table_regex = assert(regex.compile([[^\s*(?:(\|).*\|\s*|[^|].*(\|).*)\s*$]]))
 local is_table_header_separator = assert(regex.compile([[^(?=[^|]*\|)\s*:?\-*:?(?:\|\s*:?\-+:?\s*)+\|?\s*$]]))
 
+Table.minimum_width = 3
+Table.cell_margin = 1
+
 ---@param str string
 function Table.get_table_line_info(str)
 	local match = is_table_regex:match(str)
@@ -113,6 +116,21 @@ function Table.get_alignment(str)
 	return false
 end
 
+function Table.get_alignment_string(alignment, size)
+	assert(size >= 3)
+	if alignment == "left" then
+		return  string.rep("-", size)
+	elseif alignment == "left-explicit" then
+		return  ":" .. string.rep("-", size-1)
+	elseif alignment == "right" then
+		return  string.rep("-", size-1) .. ":"
+	elseif alignment == "center" then
+		return  ":" .. string.rep("-", size - 2) .. ":"
+	else
+		error("Invalid alignment")
+	end
+end
+
 function Table.get_table_info(lines, table_location)
 	local line1, line2 = table_location.line1, table_location.line2
 	local surrounded = table_location.surrounded
@@ -164,6 +182,56 @@ function Table.get_table_info(lines, table_location)
 		line2 = table_location.line2,
 		surrounded = table_location.surrounded,
 		n_cols = table_location.n_cols,
+	}
+end
+
+function Table.build_table_format(table_info)
+	local formatted_rows = { }
+	local surrounded = table_info.surrounded
+	for i, row in ipairs(table_info.rows) do
+		local formatted_row = { }
+		local cell_start = 1
+		if surrounded then
+			cell_start = cell_start + 1
+		end
+		for j, cell in ipairs(row) do
+			local text, insert_start, insert_end = cell.text, 0, 0
+			local max_length = math.max(table_info.max_lengths[j], Table.minimum_width)
+			if i == 2 then
+				text = Table.get_alignment_string(table_info.alignments[j], max_length)
+			else
+				insert_start, insert_end = select(2, Utils.format(cell.text, table_info.alignments[j], max_length)) --[[@as integer, integer]]
+			end
+
+			-- Avoid external margin on first and last columns when not surrounded
+			if surrounded or j > 1 then
+				insert_start = insert_start + Table.cell_margin
+			end
+			if surrounded or j < #row then
+				insert_end = insert_end + Table.cell_margin
+			end
+
+			table.insert(formatted_row, {
+				cell_start = cell_start,
+				text = text,
+				offset_start = insert_start,
+				offset_end = insert_end,
+			})
+			cell_start = cell_start + insert_start + #text + insert_end + 1
+		end
+		table.insert(formatted_rows, formatted_row)
+	end
+	return {
+		formatted_rows = formatted_rows,
+		-- From table_info
+		rows = table_info.rows,
+		alignments = table_info.alignments,
+		max_lengths = table_info.max_lengths,
+		-- From table_location
+		line1 = table_info.line1,
+		line2 = table_info.line2,
+		surrounded = table_info.surrounded,
+		n_cols = table_info.n_cols,
 	}
 end
 
