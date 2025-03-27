@@ -235,4 +235,88 @@ function Table.build_table_format(table_info)
 	}
 end
 
+-- TODO: check all those (surrounded and 1 or 0)
+local function offset_location(col, old_row, new_row, surrounded)
+	if col < old_row[1].cell_start then
+		-- Before the table
+		return 1
+	end
+	for i, cell in ipairs(old_row) do
+		local new_cell = new_row[i]
+		if col <= cell.cell_start + cell.offset_start then
+			-- Before the text
+			return new_cell.cell_start + new_cell.offset_start
+		elseif col <= cell.cell_start + cell.offset_start + #cell.text + (surrounded and 1 or 0) -- +1 to allow spaces to be inserted
+			and not (col >= cell.cell_start + cell.offset_start + #cell.text + cell.offset_end + (surrounded and 1 or 0)) then
+			-- Inside the text or a space after
+			local in_text_idx = col - (cell.cell_start + cell.offset_start)
+			return new_cell.cell_start + new_cell.offset_start + in_text_idx
+		elseif col < cell.cell_start + cell.offset_start + #cell.text + cell.offset_end + (surrounded and 1 or 0) then
+			-- After the text
+			return new_cell.cell_start + new_cell.offset_start + #new_cell.text + 1
+		end
+	end
+	-- After the table
+	local last_cell = old_row[#old_row]
+	local last_new_cell = new_row[#new_row]
+	local left_out_offset = col - (last_cell.cell_start + last_cell.offset_start + #last_cell.text + last_cell.offset_end)
+	return left_out_offset + (last_new_cell.cell_start + last_new_cell.offset_start + #last_new_cell.text + last_new_cell.offset_end) + (surrounded and 0 or 1), true
+end
+
+function Table.apply_table_format(doc, table_format)
+	local selections = { }
+	local additional_spaces = { }
+	for idx, line1, col1, line2, col2, swap in doc:get_selections(true, false) do
+		if line1 >= table_format.line1 and line1 <= table_format.line2 then
+			local row_idx = line1 - table_format.line1 + 1
+			local additional_space
+			col1, additional_space = offset_location(col1, table_format.rows[row_idx], table_format.formatted_rows[row_idx], table_format.surrounded)
+			if additional_space then
+				additional_spaces[line1] = true
+			end
+		end
+		if line2 >= table_format.line1 and line2 <= table_format.line2 then
+			local row_idx = line2 - table_format.line1 + 1
+			local additional_space
+			col2, additional_space = offset_location(col2, table_format.rows[row_idx], table_format.formatted_rows[row_idx], table_format.surrounded)
+			if additional_space then
+				additional_spaces[line2] = true
+			end
+		end
+		table.insert(selections, {
+			idx = idx,
+			line1 = line1,
+			col1 = col1,
+			line2 = line2,
+			col2 = col2,
+			swap = swap,
+		})
+	end
+	local res_rows = { }
+	for i, row in ipairs(table_format.formatted_rows) do
+		local res_row = { }
+		if table_format.surrounded then
+			table.insert(res_row, "|")
+		end
+		for j, cell in ipairs(row) do
+			table.insert(res_row, string.rep(" ", cell.offset_start))
+			table.insert(res_row, cell.text)
+			table.insert(res_row, string.rep(" ", cell.offset_end))
+			if not table_format.surrounded and j == table_format.n_cols and additional_spaces[i + table_format.line1 - 1] then
+				table.insert(res_row, " ") -- additional space for writing text
+			end
+			if table_format.surrounded or j < table_format.n_cols then
+				table.insert(res_row, "|")
+			end
+		end
+		table.insert(res_rows, table.concat(res_row))
+	end
+	doc:remove(table_format.line1, 1, table_format.line2, math.huge)
+	doc:insert(table_format.line1, 1, table.concat(res_rows, "\n"))
+	for _, sel in ipairs(selections) do
+		doc:set_selections(sel.idx, sel.line1, sel.col1, sel.line2, sel.col2, sel.swap)
+	end
+	doc:merge_cursors()
+end
+
 return Table
