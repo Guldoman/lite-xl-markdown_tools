@@ -260,7 +260,7 @@ local function offset_location(col, old_row, new_row, surrounded)
 	local last_cell = old_row[#old_row]
 	local last_new_cell = new_row[#new_row]
 	local left_out_offset = col - (last_cell.cell_start + last_cell.offset_start + #last_cell.text + last_cell.offset_end)
-	return left_out_offset + (last_new_cell.cell_start + last_new_cell.offset_start + #last_new_cell.text + last_new_cell.offset_end) + (surrounded and 0 or 1), true
+	return left_out_offset + (last_new_cell.cell_start + last_new_cell.offset_start + #last_new_cell.text + last_new_cell.offset_end) + (surrounded and 0 or (last_cell.offset_end > 0 and 1 or 0)), last_cell.offset_end > 0
 end
 
 function Table.apply_table_format(doc, table_format)
