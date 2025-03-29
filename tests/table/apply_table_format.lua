@@ -176,4 +176,112 @@ Cell Content | Another Cell | Last Column Cell
 	return true
 end)
 
+apply_table_format_tests:add_test("Surrounded table selections", function()
+	local doc = Doc()
+	doc:text_input([[
+ |  H_1  |  H_2  |  H_3  |
+  |  :-:  |  ---  |  --:  |
+   |  Cell Content  |  Another Cell  |  Last Column Cell  |
+    |  test  |  test  |  test  |
+]])
+--[[
+|     H_1      | H_2          |              H_3 |
+| :----------: | ------------ | ---------------: |
+| Cell Content | Another Cell | Last Column Cell |
+|     test     | test         |             test |
+--]]
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
+	local t_format = assert(Table.build_table_format(t_info))
+	local n = 1
+	for i, row in ipairs(t_format.rows) do
+		local line1 = t_format.line1 + i - 1
+		for _, cell in ipairs(row) do
+			local col1 = cell.cell_start + cell.offset_start
+			local col2 = col1 + #cell.text
+			doc:set_selections(n, line1, col1, line1, col2)
+			n = n + 1
+		end
+	end
+
+	local expected_selections = { }
+	for i, row in ipairs(t_format.formatted_rows) do
+		local line1 = t_format.line1 + i - 1
+		for _, cell in ipairs(row) do
+			local col1 = cell.cell_start + cell.offset_start
+			local col2 = col1 + #cell.text
+			table.insert(expected_selections, {
+				line1 = line1,
+				col1 = col1,
+				line2 = line1,
+				col2 = col2,
+			})
+		end
+	end
+	Table.apply_table_format(doc, t_format)
+
+	for idx, line1, col1, line2, col2 in doc:get_selections(false, false) do
+		assert(line1 == expected_selections[idx].line1)
+		assert(col1 == expected_selections[idx].col1)
+		assert(line2 == expected_selections[idx].line2)
+		assert(col2 == expected_selections[idx].col2)
+	end
+
+	return true
+end)
+
+apply_table_format_tests:add_test("Not surrounded table selections", function()
+	local doc = Doc()
+	doc:text_input([[
+ H_1  |  H_2  |  H_3
+  :-:  |  ---  |  --:
+   Cell Content  |  Another Cell  |  Last Column Cell
+    test  |  test  |  test
+]])
+--[[
+    H_1      | H_2          |              H_3
+:----------: | ------------ | ---------------:
+Cell Content | Another Cell | Last Column Cell
+    test     | test         |             test
+--]]
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
+	local t_format = assert(Table.build_table_format(t_info))
+	local n = 1
+	for i, row in ipairs(t_format.rows) do
+		local line1 = t_format.line1 + i - 1
+		for _, cell in ipairs(row) do
+			local col1 = cell.cell_start + cell.offset_start
+			local col2 = col1 + #cell.text
+			doc:set_selections(n, line1, col1, line1, col2)
+			n = n + 1
+		end
+	end
+
+	local expected_selections = { }
+	for i, row in ipairs(t_format.formatted_rows) do
+		local line1 = t_format.line1 + i - 1
+		for _, cell in ipairs(row) do
+			local col1 = cell.cell_start + cell.offset_start
+			local col2 = col1 + #cell.text
+			table.insert(expected_selections, {
+				line1 = line1,
+				col1 = col1,
+				line2 = line1,
+				col2 = col2,
+			})
+		end
+	end
+	Table.apply_table_format(doc, t_format)
+
+	for idx, line1, col1, line2, col2 in doc:get_selections(false, false) do
+		assert(line1 == expected_selections[idx].line1)
+		assert(col1 == expected_selections[idx].col1)
+		assert(line2 == expected_selections[idx].line2)
+		assert(col2 == expected_selections[idx].col2)
+	end
+
+	return true
+end)
+
 return apply_table_format_tests
