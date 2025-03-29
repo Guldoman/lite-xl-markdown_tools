@@ -263,16 +263,13 @@ local function offset_location(col, old_row, new_row, surrounded)
 				needs_extra_space = true
 			end
 			return new_cell.cell_start + new_cell.offset_start + #new_cell.text + 1, needs_extra_space
+		elseif i == #old_row then
+			-- After the table
+			return new_cell.cell_start + new_cell.offset_start + #new_cell.text + new_cell.offset_end + 1, not surrounded
 		end
 	end
-	-- After the table
-	-- We should only reach this when the cursor is outside a surrounded table.
-	-- If the table is not surrounded, it should terminate at the last cell in the loop above.
-	assert(surrounded)
-
-	local last_new_cell = new_row[#new_row]
-	local last_new_col = last_new_cell.cell_start + last_new_cell.offset_start + #last_new_cell.text + last_new_cell.offset_end
-	return last_new_col + 1
+	-- We shouldn't end up here
+	assert(false, "Reached normally unreachable code")
 end
 
 function Table.apply_table_format(doc, table_format)
