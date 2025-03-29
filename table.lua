@@ -235,7 +235,6 @@ function Table.build_table_format(table_info)
 	}
 end
 
--- TODO: check all those (surrounded and 1 or 0)
 local function offset_location(col, old_row, new_row, surrounded)
 	if col < old_row[1].cell_start then
 		-- Before the table
@@ -246,21 +245,34 @@ local function offset_location(col, old_row, new_row, surrounded)
 		if col <= cell.cell_start + cell.offset_start then
 			-- Before the text
 			return new_cell.cell_start + new_cell.offset_start
-		elseif col <= cell.cell_start + cell.offset_start + #cell.text + (surrounded and 1 or 0) -- +1 to allow spaces to be inserted
-			and not (col >= cell.cell_start + cell.offset_start + #cell.text + cell.offset_end + (surrounded and 1 or 0)) then
-			-- Inside the text or a space after
+		elseif col == cell.cell_start + cell.offset_start + #cell.text then
+			-- Special case to keep cursor at the end of the text in the header separator
+			return new_cell.cell_start + new_cell.offset_start + #new_cell.text
+		elseif col < cell.cell_start + cell.offset_start + #cell.text then
+			-- Inside the text
 			local in_text_idx = col - (cell.cell_start + cell.offset_start)
 			return new_cell.cell_start + new_cell.offset_start + in_text_idx
-		elseif col < cell.cell_start + cell.offset_start + #cell.text + cell.offset_end + (surrounded and 1 or 0) then
+		elseif col <= cell.cell_start + cell.offset_start + #cell.text + cell.offset_end then
 			-- After the text
-			return new_cell.cell_start + new_cell.offset_start + #new_cell.text + 1
+			local needs_extra_space
+			if not surrounded
+			   and col == cell.cell_start + cell.offset_start + #cell.text + cell.offset_end
+			   then
+				-- When the table is not surrounded, we need to allow adding spaces *at the end*,
+				-- So if the cursor was fully at the end of the line, signal that we need an extra space.
+				needs_extra_space = true
+			end
+			return new_cell.cell_start + new_cell.offset_start + #new_cell.text + 1, needs_extra_space
 		end
 	end
 	-- After the table
-	local last_cell = old_row[#old_row]
+	-- We should only reach this when the cursor is outside a surrounded table.
+	-- If the table is not surrounded, it should terminate at the last cell in the loop above.
+	assert(surrounded)
+
 	local last_new_cell = new_row[#new_row]
-	local left_out_offset = col - (last_cell.cell_start + last_cell.offset_start + #last_cell.text + last_cell.offset_end)
-	return left_out_offset + (last_new_cell.cell_start + last_new_cell.offset_start + #last_new_cell.text + last_new_cell.offset_end) + (surrounded and 0 or (last_cell.offset_end > 0 and 1 or 0)), last_cell.offset_end > 0
+	local last_new_col = last_new_cell.cell_start + last_new_cell.offset_start + #last_new_cell.text + last_new_cell.offset_end
+	return last_new_col + 1
 end
 
 function Table.apply_table_format(doc, table_format)
