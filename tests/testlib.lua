@@ -111,6 +111,7 @@ function TestLib:add_test(...)
 end
 
 function TestLib:run()
+	self.output_fn("TAP version 14")
 	self:run_indented(0)
 end
 
@@ -158,7 +159,10 @@ function TestLib:run_indented(level)
 			goto continue
 		end
 		self.before_each()
-		completed, a, b = pcall(t.fn --[[@as test_fn]])
+		completed, a, b = xpcall(t.fn --[[@as test_fn]], function(msg)
+			print(">>>", debug.traceback("", 2))
+			print("---->", msg)
+		end)
 		if not completed then
 			result = false
 			message = a
