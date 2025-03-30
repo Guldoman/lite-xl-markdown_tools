@@ -1,0 +1,28 @@
+name: Test
+
+on:
+  push:
+
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Lite XL
+        run: |
+          wget https://github.com/lite-xl/lite-xl/releases/download/v2.1.7/lite-xl-v2.1.7-linux-x86_64-portable.tar.gz
+          tar -xzf lite-xl-v2.1.7-linux-x86_64-portable.tar.gz
+      - name: Initialize test environment
+        run: |
+          cd lite-xl
+          mkdir -p user/plugins/markdown_tools
+          echo 'require "plugins.markdown_tools.tests" os.exit()' > user/init.lua
+      - name: Install markdown_tools plugin
+        uses: actions/checkout@v4
+        with:
+          path: lite-xl/user/plugins/markdown_tools
+      - name: Run tests
+        run: SDL_VIDEODRIVER=dummy ./lite-xl/lite-xl > test_output.tap
+      - name: Create test summary
+        uses: pcolby/tap-summary@v1
+        with:
+          path: test_output.tap
