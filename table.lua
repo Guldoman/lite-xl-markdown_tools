@@ -328,4 +328,203 @@ function Table.apply_table_format(doc, table_format)
 	doc:merge_cursors()
 end
 
+--TODO: needs tests
+function Table.insert_row(table_info, index, row)
+	assert(index ~= 1, "Can't insert header")
+	assert(index ~= 2, "Can't insert header separator")
+	assert(index <= table_info.line2 - table_info.line1 + 2 and index > 0, "Invalid index")
+
+	if not row then
+		row = { }
+		for _=1, table_info.n_cols do
+			table.insert(row, "")
+		end
+	end
+	assert(#row == table_info.n_cols, "Mismatching number of columns")
+
+	local built_row = { }
+	local cell_start = 1
+	for _, cell_text in ipairs(row) do
+		local text, trim_start, trim_end = Utils.trim(cell_text)
+		table.insert(built_row, {
+			cell_start = cell_start,
+			text = text,
+			offset_start = #trim_start,
+			offset_end = #trim_end,
+		})
+		cell_start = cell_start + #trim_start + #text + #trim_end
+	end
+	table.insert(table_info.rows, index, built_row)
+	table_info.line2 = table_info.line2 + 1
+end
+
+--TODO: needs tests
+function Table.replace_row(table_info, index, row)
+	assert(index <= table_info.line2 - table_info.line1 + 1 and index > 0, "Invalid index")
+
+	if not row then
+		row = { }
+		for _=1, table_info.n_cols do
+			if index == 2 then
+				table.insert(row, "---")
+			else
+				table.insert(row, "")
+			end
+		end
+	end
+	assert(#row == table_info.n_cols, "Mismatching number of columns")
+
+	local table_row = table_info.rows[index]
+	local cell_start = table_info.surrounded and 2 or 1
+	for i, cell_text in ipairs(row) do
+		local text, trim_start, trim_end = Utils.trim(cell_text)
+		table_row[i] = {
+			cell_start = cell_start,
+			text = text,
+			offset_start = #trim_start,
+			offset_end = #trim_end,
+		}
+		cell_start = cell_start + #trim_start + #text + #trim_end + 1
+	end
+	if index == 2 then
+		for i, cell in ipairs(table_info.rows[2]) do
+			table_info.alignments[i] = Table.get_alignment(cell.text)
+		end
+	end
+	local max_lens = { }
+	for i, t_row in ipairs(table_info.rows) do
+		-- Skip header separation line
+		if i ~= 2 then
+			for j, cell in ipairs(t_row) do
+				max_lens[j] = math.max(max_lens[j] or 0, string.ulen(cell.text))
+			end
+		end
+	end
+	table_info.max_lengths = max_lens
+end
+
+--TODO: needs tests
+function Table.remove_row(table_info, index)
+	assert(index ~= 1, "Can't remove header")
+	assert(index ~= 2, "Can't remove header separator")
+	assert(index <= table_info.line2 - table_info.line1 + 1 and index > 0, "Invalid index")
+	-- TODO: should we allow deleting the last row?
+	assert(#table_info.rows > 3, "Can't remove the only content row")
+
+	table.remove(table_info.rows, index)
+	table_info.line2 = table_info.line2 - 1
+end
+
+--TODO: needs tests
+function Table.insert_column(table_info, index, col)
+	assert(index > 0 and index <= table_info.n_cols + 1, "Invalid index")
+
+	if not col then
+		col = { }
+		for i=1, table_info.line2 - table_info.line1 + 1 do
+			if i == 2 then
+				table.insert(col, "---")
+			else
+				table.insert(col, "")
+			end
+		end
+	end
+	assert(#col == table_info.line2 - table_info.line1 + 1, "Mismatching number of rows")
+	local alignment = assert(Table.get_alignment(col[2]), "Invalid alignment string")
+	local max_lens = 0
+	for i, cell_text in ipairs(col) do
+		if i ~= 1 then
+			max_lens = math.max(max_lens, string.ulen(cell_text))
+		end
+	end
+
+	for i, row in ipairs(table_info.rows) do
+		local cell_start = table_info.surrounded and 2 or 1
+		if index > 1 then
+			local prev_cell = row[index - 1]
+			cell_start = prev_cell.cell_start + prev_cell.offset_start + #prev_cell.text + prev_cell.offset_end + 1
+		end
+		local text, trim_start, trim_end = Utils.trim(col[i])
+		local new_cell = {
+			cell_start = cell_start,
+			text = text,
+			offset_start = #trim_start,
+			offset_end = #trim_end,
+		}
+		local offset = #text + #trim_start + #trim_end + 1
+		for j=index, table_info.n_cols do
+			local cell = row[j]
+			cell.cell_start = cell.cell_start + offset
+		end
+		table.insert(row, index, new_cell)
+	end
+	table.insert(table_info.alignments, index, alignment)
+	table.insert(table_info.max_lengths, index, max_lens)
+	table_info.n_cols = table_info.n_cols + 1
+end
+
+--TODO: needs tests
+function Table.replace_column(table_info, index, col)
+	assert(index > 0 and index <= table_info.n_cols, "Invalid index")
+
+	if not col then
+		col = { }
+		for i=1, table_info.line2 - table_info.line1 + 1 do
+			if i == 2 then
+				table.insert(col, "---")
+			else
+				table.insert(col, "")
+			end
+		end
+	end
+	assert(#col == table_info.line2 - table_info.line1 + 1, "Mismatching number of rows")
+	local alignment = assert(Table.get_alignment(col[2]), "Invalid alignment string")
+	local max_lens = 0
+	for i, cell_text in ipairs(col) do
+		if i ~= 2 then
+			max_lens = math.max(max_lens, string.ulen(cell_text))
+		end
+	end
+
+	for i, row in ipairs(table_info.rows) do
+		local text, trim_start, trim_end = Utils.trim(col[i])
+		local cell = row[index]
+		local old_size = cell.offset_start + #cell.text + cell.offset_end
+		cell = {
+			cell_start = cell.cell_start,
+			text = text,
+			offset_start = #trim_start,
+			offset_end = #trim_end,
+		}
+		local new_size = cell.offset_start + #cell.text + cell.offset_end
+		row[index] = cell
+		local offset = new_size - old_size
+		for j=index + 1, table_info.n_cols do
+			local ucell = row[j]
+			ucell.cell_start = ucell.cell_start + offset
+		end
+	end
+	table_info.alignments[index] = alignment
+	table_info.max_lengths[index] = max_lens
+end
+
+--TODO: needs tests
+function Table.remove_column(table_info, index)
+	assert(index > 0 and index <= table_info.n_cols, "Invalid index")
+	assert(table_info.n_cols > 1, "Can't remove the only column")
+	for _, row in ipairs(table_info.rows) do
+		if index < table_info.n_cols then
+			local offset = row[index + 1].cell_start - row[index].cell_start
+			for j=index + 1, table_info.n_cols do
+				local cell = row[j]
+				cell.cell_start = cell.cell_start - offset
+			end
+		end
+		table.remove(row, index)
+	end
+	table.remove(table_info.alignments, index)
+	table.remove(table_info.max_lengths, index)
+	table_info.n_cols = table_info.n_cols - 1
+end
+
 return Table
