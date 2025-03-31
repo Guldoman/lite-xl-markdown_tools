@@ -144,10 +144,144 @@ local function format_if_needed(doc)
 	end
 end
 
+local function get_cell_xy(line, col, t_info)
+	local row_idx = line - t_info.line1 + 1
+	local tcol = t_info.n_cols
+	for i, cell in ipairs(t_info.rows[row_idx]) do
+		if col <= cell.cell_start + cell.offset_start + #cell.text + cell.offset_end then
+			tcol = i
+			break
+		end
+	end
+	return row_idx, tcol
+end
+
 command.add(is_view_supported_and_in_table, {
 	["markdown-tools:format-table"] = function(dv)
 		format_if_needed(dv.doc)
-	end
+	end,
+	["markdown-tools:select-column"] = function(dv)
+		local doc = dv.doc
+		local line, col = doc:get_selection(false, true)
+		local t_loc = Table.is_table(doc.lines, line)
+		local t_info = Table.get_table_info(doc.lines, t_loc)
+		local _, y = get_cell_xy(line, col, t_info)
+		local n = 1
+		for i, row in ipairs(t_info.rows) do
+			local cell = row[y]
+			local l = i + t_info.line1 - 1
+			doc:set_selections(n, l, cell.cell_start, l, cell.cell_start + cell.offset_start + #cell.text + cell.offset_end)
+			n = n + 1
+		end
+	end,
+	["markdown-tools:next-cell"] = function(dv)
+		local doc = dv.doc
+		local line, col = doc:get_selection(false, true)
+		local t_loc = Table.is_table(doc.lines, line)
+		local t_info = Table.get_table_info(doc.lines, t_loc)
+		local x, y = get_cell_xy(line, col, t_info)
+		y = y + 1
+		if y > t_info.n_cols then
+			y = 1
+			x = x + 1
+		end
+		if x > t_info.line2 - t_info.line1 + 1 then
+			x = 1
+		end
+		local l = t_info.line1 + x - 1
+		local cell = t_info.rows[x][y]
+		local c = cell.cell_start + cell.offset_start
+		doc:set_selection(l, c, l, c)
+	end,
+	["markdown-tools:previous-cell"] = function(dv)
+		local doc = dv.doc
+		local line, col = doc:get_selection(false, true)
+		local t_loc = Table.is_table(doc.lines, line)
+		local t_info = Table.get_table_info(doc.lines, t_loc)
+		local x, y = get_cell_xy(line, col, t_info)
+		y = y - 1
+		if y <= 0 then
+			y = t_info.n_cols
+			x = x - 1
+		end
+		if x <= 0 then
+			x = t_info.line2 - t_info.line1 + 1
+		end
+		local l = t_info.line1 + x - 1
+		local cell = t_info.rows[x][y]
+		local c = cell.cell_start + cell.offset_start
+		doc:set_selection(l, c, l, c)
+	end,
+	["markdown-tools:add-row-above"] = function(dv)
+		local doc = dv.doc
+		local line, col = doc:get_selection(false, true)
+		local t_loc = Table.is_table(doc.lines, line)
+		local t_info = Table.get_table_info(doc.lines, t_loc)
+		local x, y = get_cell_xy(line, col, t_info)
+		Table.insert_row(t_info, x)
+		local t_format = Table.build_table_format(t_info)
+		Table.apply_table_format(doc, t_format)
+		line = t_format.line1 + x - 1
+		col = t_format.formatted_rows[x][y].cell_start + t_format.formatted_rows[x][y].offset_start
+		doc:set_selection(line, col)
+	end,
+	["markdown-tools:add-row-below"] = function(dv)
+		local doc = dv.doc
+		local line, col = doc:get_selection(false, true)
+		local t_loc = Table.is_table(doc.lines, line)
+		local t_info = Table.get_table_info(doc.lines, t_loc)
+		local x, y = get_cell_xy(line, col, t_info)
+		if x < 2 then x = 2 end
+		Table.insert_row(t_info, x + 1)
+		local t_format = Table.build_table_format(t_info)
+		Table.apply_table_format(doc, t_format)
+		line = t_format.line1 + x
+		col = t_format.formatted_rows[x + 1][y].cell_start + t_format.formatted_rows[x + 1][y].offset_start
+		doc:set_selection(line, col)
+	end,
+	["markdown-tools:add-column-left"] = function(dv)
+		local doc = dv.doc
+		local line, col = doc:get_selection(false, true)
+		local t_loc = Table.is_table(doc.lines, line)
+		local t_info = Table.get_table_info(doc.lines, t_loc)
+		local x, y = get_cell_xy(line, col, t_info)
+		Table.insert_column(t_info, y)
+		local t_format = Table.build_table_format(t_info)
+		Table.apply_table_format(doc, t_format)
+		col = t_format.formatted_rows[x][y].cell_start + t_format.formatted_rows[x][y].offset_start
+		doc:set_selection(line, col)
+	end,
+	["markdown-tools:add-column-right"] = function(dv)
+		local doc = dv.doc
+		local line, col = doc:get_selection(false, true)
+		local t_loc = Table.is_table(doc.lines, line)
+		local t_info = Table.get_table_info(doc.lines, t_loc)
+		local x, y = get_cell_xy(line, col, t_info)
+		Table.insert_column(t_info, y + 1)
+		local t_format = Table.build_table_format(t_info)
+		Table.apply_table_format(doc, t_format)
+		col = t_format.formatted_rows[x][y + 1].cell_start + t_format.formatted_rows[x][y + 1].offset_start
+		doc:set_selection(line, col)
+	end,
+	["markdown-tools:delete-column"] = function(dv)
+		local doc = dv.doc
+		local line, col = doc:get_selection(false, true)
+		local t_loc = Table.is_table(doc.lines, line)
+		local t_info = Table.get_table_info(doc.lines, t_loc)
+		local x, y = get_cell_xy(line, col, t_info)
+		local last = y == t_info.n_cols
+		Table.remove_column(t_info, y)
+		local t_format = Table.build_table_format(t_info)
+		Table.apply_table_format(doc, t_format)
+		col = t_format.formatted_rows[x][y - (last and 1 or 0)].cell_start + t_format.formatted_rows[x][y - (last and 1 or 0)].offset_start
+		doc:set_selection(line, col)
+	end,
+})
+
+keymap.add({
+	["tab"] = "markdown-tools:next-cell",
+	["shift+tab"] = "markdown-tools:previous-cell",
+	["return"] = "markdown-tools:add-row-below",
 })
 
 local Doc = require "core.doc"
