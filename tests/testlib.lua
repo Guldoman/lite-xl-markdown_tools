@@ -24,7 +24,8 @@ local TestLib = Object:extend()
 ---@alias test_directives "SKIP" | "TODO"
 
 ---@class test
----@field fn testable
+---@field fn? test_fn
+---@field subtest? TestLib
 ---@field description? string
 ---@field directive? test_directives
 ---@field directive_reason? string
@@ -56,6 +57,7 @@ function TestLib:new(name, options)
 		TODO = true,
 	}
 
+	---@type table[test]
 	self.tests = { }
 end
 
@@ -84,7 +86,7 @@ end
 ---@override fun(name: string, directive: test_directive, test: testable)
 function TestLib:add_test(...)
 	local args = { ... }
-	local fn, description, directive, directive_reason
+	local fn, description, directive, directive_reason, subtest
 	if #args == 1 then
 		fn = args[1]
 	elseif #args == 2 then
@@ -102,8 +104,13 @@ function TestLib:add_test(...)
 	else
 		error("Wrong number of parameters")
 	end
+	if type(fn) ~= "function" and fn:extends(TestLib) then
+		subtest = fn
+		fn = nil
+	end
 	table.insert(self.tests, {
 		fn = fn,
+		subtest = subtest,
 		description = description,
 		directive = directive,
 		directive_reason = directive_reason,
@@ -127,6 +134,8 @@ function TestLib:get_test_message(test)
 	local message = ""
 	if test.description then
 		message = message .. " - " .. test.description
+	elseif test.subtest then
+		message = message .. " - " .. test.subtest.name
 	end
 	if test.directive then
 		message = message .. " # " .. test.directive
@@ -142,27 +151,24 @@ end
 function TestLib:run_indented(level)
 	local failed_tests = { }
 	local failed_message
-	self.output_fn(self:get_indented("# " .. self.name, level))
 	self.output_fn(self:get_indented("1.." .. #self.tests, level))
 	self.before_all()
 	for i, t in ipairs(self.tests) do
+		local completed, a, b, result, message
 		---@cast t test
-		if type(t.fn) ~= "function" then
-			local tl = t.fn
-			---@cast tl TestLib
+		if t.subtest then
+			local run_indented = t.subtest.run_indented
+			local name = t.subtest.name
 			t.fn = function()
-				return tl:run_indented(level + 1)
+				self.output_fn(self:get_indented("# Subtest: " .. name, level))
+				return run_indented(t.subtest, level + 1)
 			end
 		end
-		local completed, a, b, result, message
 		if t.directive == "SKIP" then
 			goto continue
 		end
 		self.before_each()
-		completed, a, b = xpcall(t.fn --[[@as test_fn]], function(msg)
-			print(">>>", debug.traceback("", 2))
-			print("---->", msg)
-		end)
+		completed, a, b = pcall(t.fn --[[@as test_fn]])
 		if not completed then
 			result = false
 			message = a
