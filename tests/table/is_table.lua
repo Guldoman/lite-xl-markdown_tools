@@ -513,4 +513,146 @@ c1 |c2 |c3\|
 	return true
 end)
 
+is_table_tests:add_test("Table surrounded with empty header", function()
+	local doc = Doc()
+	doc:text_input([[
+| | | |
+|---|---|---|
+|c1 |c2 |c3 |
+|c1 |c2 |c3 |
+]])
+	for i=1,4 do
+		local res = Table.is_table(doc.lines, i)
+		assert(res)
+		assert(res.line1 == 1)
+		assert(res.line2 == 4)
+		assert(res.surrounded == true)
+		assert(res.n_cols == 3)
+	end
+
+	doc = Doc()
+	doc:text_input([[
+||||
+|---|---|---|
+|c1 |c2 |c3 |
+|c1 |c2 |c3 |
+]])
+	for i=1,4 do
+		local res = Table.is_table(doc.lines, i)
+		assert(res)
+		assert(res.line1 == 1)
+		assert(res.line2 == 4)
+		assert(res.surrounded == true)
+		assert(res.n_cols == 3)
+	end
+	return true
+end)
+
+is_table_tests:add_test("Table surrounded with empty data rows", function()
+	local doc = Doc()
+	doc:text_input([[
+|H1|H2|H3|
+|---|---|---|
+| | | |
+| | | |
+]])
+	for i=1,4 do
+		local res = Table.is_table(doc.lines, i)
+		assert(res)
+		assert(res.line1 == 1)
+		assert(res.line2 == 4)
+		assert(res.surrounded == true)
+		assert(res.n_cols == 3)
+	end
+
+	doc = Doc()
+	doc:text_input([[
+|H1|H2|H3|
+|---|---|---|
+||||
+||||
+]])
+	for i=1,4 do
+		local res = Table.is_table(doc.lines, i)
+		assert(res)
+		assert(res.line1 == 1)
+		assert(res.line2 == 4)
+		assert(res.surrounded == true)
+		assert(res.n_cols == 3)
+	end
+	return true
+end)
+
+is_table_tests:add_test("Table not surrounded with empty header",
+                        "SKIP", "How to handle the similarity with a surrounded table", function()
+	local doc = Doc()
+	doc:text_input([[
+ | | 
+---|---|---
+c1 |c2 |c3
+c1 |c2 |c3
+]])
+	for i=1,4 do
+		local res, reason = Table.is_table(doc.lines, i)
+		assert(res, reason)
+		assert(res.line1 == 1)
+		assert(res.line2 == 4)
+		assert(res.surrounded == false)
+		assert(res.n_cols == 3)
+	end
+
+	doc = Doc()
+	doc:text_input([[
+||
+---|---|---
+c1 |c2 |c3
+c1 |c2 |c3
+]])
+	for i=1,4 do
+		local res, reason = Table.is_table(doc.lines, i)
+		assert(res, reason)
+		assert(res.line1 == 1)
+		assert(res.line2 == 4)
+		assert(res.surrounded == false)
+		assert(res.n_cols == 3)
+	end
+	return true
+end)
+
+is_table_tests:add_test("Table not surrounded with empty data rows",
+                        "SKIP", "How to handle the similarity with a surrounded table", function()
+	local doc = Doc()
+	doc:text_input([[
+H1|H2|H3
+---|---|---
+ | | 
+ | | 
+]])
+	for i=1,4 do
+		local res, reason = Table.is_table(doc.lines, i)
+		assert(res, reason)
+		assert(res.line1 == 1)
+		assert(res.line2 == 4)
+		assert(res.surrounded == false)
+		assert(res.n_cols == 3)
+	end
+
+	doc = Doc()
+	doc:text_input([[
+H1|H2|H3
+---|---|---
+||
+||
+]])
+	for i=1,4 do
+		local res, reason = Table.is_table(doc.lines, i)
+		assert(res, reason)
+		assert(res.line1 == 1)
+		assert(res.line2 == 4)
+		assert(res.surrounded == false)
+		assert(res.n_cols == 3)
+	end
+	return true
+end)
+
 return is_table_tests
