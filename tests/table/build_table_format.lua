@@ -285,4 +285,238 @@ testa|testb|testc
 	return true
 end)
 
+build_table_format_tests:add_test("Surrounded table with multi-byte characters", function()
+	local doc = Doc()
+	doc:text_input([[
+|Hà|Hè|Hé|
+|:-:|---|--:|
+|Celì Content|Anòther Cell|Last Colùmn Cell|
+|çtest|€test|£test|
+]])
+--[[
+|      Hà      | Hè           |               Hé |
+| :----------: | ------------ | ---------------: |
+| Celì Content | Anòther Cell | Last Colùmn Cell |
+|    çtest     | €test        |            £test |
+--]]
+	local expected_format = {
+		{
+			{
+				cell_start = 2,
+				text = "Hà",
+				offset_start = 6,
+				offset_end = 6,
+			},
+			{
+				cell_start = 18,
+				text = "Hè",
+				offset_start = 1,
+				offset_end = 11,
+			},
+			{
+				cell_start = 34,
+				text = "Hé",
+				offset_start = 15,
+				offset_end = 1,
+			},
+		},
+		{
+			{
+				cell_start = 2,
+				text = ":----------:",
+				offset_start = 1,
+				offset_end = 1,
+			},
+			{
+				cell_start = 17,
+				text = "------------",
+				offset_start = 1,
+				offset_end = 1,
+			},
+			{
+				cell_start = 32,
+				text = "---------------:",
+				offset_start = 1,
+				offset_end = 1,
+			},
+		},
+		{
+			{
+				cell_start = 2,
+				text = "Celì Content",
+				offset_start = 1,
+				offset_end = 1,
+			},
+			{
+				cell_start = 18,
+				text = "Anòther Cell",
+				offset_start = 1,
+				offset_end = 1,
+			},
+			{
+				cell_start = 34,
+				text = "Last Colùmn Cell",
+				offset_start = 1,
+				offset_end = 1,
+			},
+		},
+		{
+			{
+				cell_start = 2,
+				text = "çtest",
+				offset_start = 4,
+				offset_end = 5,
+			},
+			{
+				cell_start = 18,
+				text = "€test",
+				offset_start = 1,
+				offset_end = 8,
+			},
+			{
+				cell_start = 35,
+				text = "£test",
+				offset_start = 12,
+				offset_end = 1,
+			},
+		},
+	}
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
+	local t_format = assert(Table.build_table_format(t_info))
+
+	-- t_format should keep every field of t_info
+	for k, v in pairs(t_info) do
+		assert(t_format[k] == v)
+	end
+
+	assert(t_format.formatted_rows)
+	for i, row in ipairs(t_format.formatted_rows) do
+		for j, cell in ipairs(row) do
+			local expected = expected_format[i][j]
+			for k, v in pairs(cell) do
+				assert(expected[k] == v, string.format("%d.%d %s: Expected %s, got %s", i, j, k, expected[k], v))
+			end
+		end
+	end
+	return true
+end)
+
+build_table_format_tests:add_test("Not surrounded table with multi-byte characters", function()
+	local doc = Doc()
+	doc:text_input([[
+Hà|Hè|Hé
+:-:|---|--:
+Celì Content|Anòther Cell|Last Colùmn Cell
+çtest|€test|£test
+]])
+--[[
+      Hà      | Hè           |               Hé
+ :----------: | ------------ | ---------------:
+ Celì Content | Anòther Cell | Last Colùmn Cell
+    çtest     | €test        |            £test
+--]]
+	local expected_format = {
+		{
+			{
+				cell_start = 1,
+				text = "Hà",
+				offset_start = 6,
+				offset_end = 6,
+			},
+			{
+				cell_start = 17,
+				text = "Hè",
+				offset_start = 1,
+				offset_end = 11,
+			},
+			{
+				cell_start = 33,
+				text = "Hé",
+				offset_start = 15,
+				offset_end = 0,
+			},
+		},
+		{
+			{
+				cell_start = 1,
+				text = ":----------:",
+				offset_start = 1,
+				offset_end = 1,
+			},
+			{
+				cell_start = 16,
+				text = "------------",
+				offset_start = 1,
+				offset_end = 1,
+			},
+			{
+				cell_start = 31,
+				text = "---------------:",
+				offset_start = 1,
+				offset_end = 0,
+			},
+		},
+		{
+			{
+				cell_start = 1,
+				text = "Celì Content",
+				offset_start = 1,
+				offset_end = 1,
+			},
+			{
+				cell_start = 17,
+				text = "Anòther Cell",
+				offset_start = 1,
+				offset_end = 1,
+			},
+			{
+				cell_start = 33,
+				text = "Last Colùmn Cell",
+				offset_start = 1,
+				offset_end = 0,
+			},
+		},
+		{
+			{
+				cell_start = 1,
+				text = "çtest",
+				offset_start = 4,
+				offset_end = 5,
+			},
+			{
+				cell_start = 17,
+				text = "€test",
+				offset_start = 1,
+				offset_end = 8,
+			},
+			{
+				cell_start = 34,
+				text = "£test",
+				offset_start = 12,
+				offset_end = 0,
+			},
+		},
+	}
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
+	local t_format = assert(Table.build_table_format(t_info))
+
+	-- t_format should keep every field of t_info
+	for k, v in pairs(t_info) do
+		assert(t_format[k] == v)
+	end
+
+	assert(t_format.formatted_rows)
+	for i, row in ipairs(t_format.formatted_rows) do
+		for j, cell in ipairs(row) do
+			local expected = expected_format[i][j]
+			for k, v in pairs(cell) do
+				assert(expected[k] == v, string.format("%d.%d %s: Expected %s, got %s", i, j, k, expected[k], v))
+			end
+		end
+	end
+	return true
+end)
+
 return build_table_format_tests

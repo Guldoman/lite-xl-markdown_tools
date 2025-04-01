@@ -655,4 +655,42 @@ H1|H2|H3
 	return true
 end)
 
+is_table_tests:add_test("Surrounded table with multi-byte characters", function()
+	local doc = Doc()
+	doc:text_input([[
+|à1|è2|ì3|
+|---|---|---|
+|ò1 |ù2 |é3 |
+|ç1 |€2 |£3 |
+]])
+	for i=1,4 do
+		local res = Table.is_table(doc.lines, i)
+		assert(res)
+		assert(res.line1 == 1)
+		assert(res.line2 == 4)
+		assert(res.surrounded == true)
+		assert(res.n_cols == 3)
+	end
+	return true
+end)
+
+is_table_tests:add_test("Not surrounded table with multi-byte characters", function()
+	local doc = Doc()
+	doc:text_input([[
+à1|è2|ì3
+---|---|---
+ò1 |ù2 |é3
+ç1 |€2 |£3
+]])
+	for i=1,4 do
+		local res = Table.is_table(doc.lines, i)
+		assert(res)
+		assert(res.line1 == 1)
+		assert(res.line2 == 4)
+		assert(res.surrounded == false)
+		assert(res.n_cols == 3)
+	end
+	return true
+end)
+
 return is_table_tests

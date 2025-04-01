@@ -299,4 +299,100 @@ cell7|cell8|cell9|cell7
 	return true
 end)
 
+get_table_info_tests:add_test("Surrounded table with multi-byte characters", function()
+	local doc = Doc()
+	doc:text_input([[
+|cellà|cellè|cellé|
+|-----|-----|-----|
+|cellì|cellò|cellù|
+|cellç|cell€|cell£|
+]])
+	local symbols = { "à", "è", "é", "ì", "ò", "ù", "ç", "€", "£", }
+	local starts = {
+		{ 2, 9, 16, },
+		{ 2, 8, 14, },
+		{ 2, 9, 16, },
+		{ 2, 9, 17, },
+	}
+
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
+
+	-- t_info should keep every field of t_loc
+	for k, v in pairs(t_loc) do
+		assert(t_info[k] == v)
+	end
+
+	local n = 1
+	for i, row in ipairs(t_info.rows) do
+		for j, cell in ipairs(row) do
+			if i ~= 2 then
+				assert(cell.text == string.format("cell%s", symbols[n]), cell.text)
+				n = n + 1
+			else
+				assert(cell.text == string.format("-----", n))
+			end
+			assert(cell.cell_start == starts[i][j])
+			assert(cell.offset_start == 0)
+			assert(cell.offset_end == 0)
+		end
+	end
+	assert(n == 9 + 1, "Wrong number of cells")
+	assert(t_info.alignments[1] == "left")
+	assert(t_info.alignments[2] == "left")
+	assert(t_info.alignments[3] == "left")
+	assert(t_info.max_lengths[1] == 5)
+	assert(t_info.max_lengths[2] == 5)
+	assert(t_info.max_lengths[3] == 5)
+	return true
+end)
+
+get_table_info_tests:add_test("Not surrounded table with multi-byte characters", function()
+	local doc = Doc()
+	doc:text_input([[
+cellà|cellè|cellé
+-----|-----|-----
+cellì|cellò|cellù
+cellç|cell€|cell£
+]])
+	local symbols = { "à", "è", "é", "ì", "ò", "ù", "ç", "€", "£", }
+	local starts = {
+		{ 1, 8, 15, },
+		{ 1, 7, 13, },
+		{ 1, 8, 15, },
+		{ 1, 8, 16, },
+	}
+
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
+
+	-- t_info should keep every field of t_loc
+	for k, v in pairs(t_loc) do
+		assert(t_info[k] == v)
+	end
+
+	local n = 1
+	for i, row in ipairs(t_info.rows) do
+		for j, cell in ipairs(row) do
+			if i ~= 2 then
+				assert(cell.text == string.format("cell%s", symbols[n]), cell.text)
+				n = n + 1
+			else
+				assert(cell.text == string.format("-----"))
+			end
+			assert(cell.cell_start == starts[i][j])
+			assert(cell.offset_start == 0)
+			assert(cell.offset_end == 0)
+		end
+	end
+	assert(n == 9 + 1, "Wrong number of cells")
+	assert(t_info.alignments[1] == "left")
+	assert(t_info.alignments[2] == "left")
+	assert(t_info.alignments[3] == "left")
+	assert(t_info.max_lengths[1] == 5)
+	assert(t_info.max_lengths[2] == 5)
+	assert(t_info.max_lengths[3] == 5)
+	return true
+end)
+
 return get_table_info_tests
