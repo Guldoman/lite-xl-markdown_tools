@@ -57,16 +57,16 @@ apply_table_format_tests:add_test("Not surrounded table", function()
     test  |  test  |  test
 ]])
 --[[
-    H_1      | H_2          |              H_3
-:----------: | ------------ | ---------------:
-Cell Content | Another Cell | Last Column Cell
-    test     | test         |             test
+     H_1      | H_2          |              H_3
+ :----------: | ------------ | ---------------:
+ Cell Content | Another Cell | Last Column Cell
+     test     | test         |             test
 --]]
 	local expected_selections = {
-		5, 6, 7, 8, 9, 16, 17, 18, 19, 20, 44, 45, 46, 47,
-		1, 2, 3, 13, 14, 16, 17, 18, 28, 29, 31, 32, 33, 47,
-		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
-		5, 6, 7, 8, 9, 10, 16, 17, 18, 19, 20, 21, 43, 44, 45, 46, 47,
+		6, 7, 8, 9, 10, 17, 18, 19, 20, 21, 45, 46, 47, 48,
+		2, 3, 4, 14, 15, 17, 18, 19, 29, 30, 32, 33, 34, 48,
+		2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+		6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22, 44, 45, 46, 47, 48,
 		1,
 	}
 	local n = 1
@@ -125,10 +125,10 @@ apply_table_format_tests:add_test("Not surrounded table don't go to next cell", 
     test  |  test  |  test
 ]])
 --[[
-    H_1      | H_2          |              H_3 
-:----------: | ------------ | ---------------:
-Cell Content | Another Cell | Last Column Cell 
-    test     | test         |             test
+     H_1      | H_2          |              H_3 
+ :----------: | ------------ | ---------------:
+ Cell Content | Another Cell | Last Column Cell 
+     test     | test         |             test
 --]]
 	doc:set_selection(1, 7, 1, 7)
 	local t_loc = assert(Table.is_table(doc.lines, 1))
@@ -137,8 +137,8 @@ Cell Content | Another Cell | Last Column Cell
 	Table.apply_table_format(doc, t_format)
 
 	local _, col1, _, col2 = doc:get_selection(false, false)
-	assert(col1 == 9)
-	assert(col2 == 9)
+	assert(col1 == 10)
+	assert(col2 == 10)
 
 	return true
 end)
@@ -152,10 +152,10 @@ apply_table_format_tests:add_test("Not surrounded table add last space", functio
     test  |  test  |  test
 ]])
 --[[
-    H_1      | H_2          |              H_3 
-:----------: | ------------ | ---------------:
-Cell Content | Another Cell | Last Column Cell 
-    test     | test         |             test
+     H_1      | H_2          |              H_3 
+ :----------: | ------------ | ---------------:
+ Cell Content | Another Cell | Last Column Cell 
+     test     | test         |             test
 --]]
 	doc:set_selections(1, 1, 22, 1, 22)
 	doc:set_selections(2, 3, 55, 3, 55)
@@ -165,13 +165,13 @@ Cell Content | Another Cell | Last Column Cell
 	Table.apply_table_format(doc, t_format)
 
 	for _, _, col1, _, col2, _ in doc:get_selections(false, false) do
-		assert(col1 == 48)
-		assert(col2 == 48)
+		assert(col1 == 49)
+		assert(col2 == 49)
 	end
-	assert(#doc.lines[1] == 48)
-	assert(#doc.lines[2] == 47)
-	assert(#doc.lines[3] == 48)
-	assert(#doc.lines[4] == 47)
+	assert(#doc.lines[1] == 49)
+	assert(#doc.lines[2] == 48)
+	assert(#doc.lines[3] == 49)
+	assert(#doc.lines[4] == 48)
 
 	return true
 end)

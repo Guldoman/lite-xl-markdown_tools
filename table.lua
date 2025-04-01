@@ -203,8 +203,10 @@ function Table.build_table_format(table_info)
 				insert_start, insert_end = select(2, Utils.format(cell.text, table_info.alignments[j], max_length)) --[[@as integer, integer]]
 			end
 
-			-- Avoid external margin on first and last columns when not surrounded
-			if surrounded or j > 1 then
+			-- Avoid external margin on first and last columns when not surrounded.
+			-- Except for when the alignment is "center" for the first column,
+			-- as it would look wrong otherwise.
+			if surrounded or j > 1 or table_info.alignments[j] == "center" then
 				insert_start = insert_start + Table.cell_margin
 			end
 			if surrounded or j < #row then
