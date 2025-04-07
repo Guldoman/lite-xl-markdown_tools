@@ -693,4 +693,23 @@ is_table_tests:add_test("Not surrounded table with multi-byte characters", funct
 	return true
 end)
 
+is_table_tests:add_test("Surrounded table with escaped pipes", function()
+	local doc = Doc()
+	doc:text_input([[
+|H\|1|H\|2|H\|3|
+|---|---|---|
+|c\|1 |c\|2 |c\|3 |
+|c\|1 |c\|2 |c\|3 |
+]])
+	for i=1,4 do
+		local res, reason = Table.is_table(doc.lines, i)
+		assert(res, reason)
+		assert(res.line1 == 1)
+		assert(res.line2 == 4)
+		assert(res.surrounded == true)
+		assert(res.n_cols == 3)
+	end
+	return true
+end)
+
 return is_table_tests

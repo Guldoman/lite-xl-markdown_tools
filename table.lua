@@ -15,10 +15,19 @@ Table.cell_margin = 1
 function Table.get_table_line_info(str)
 	local match = is_table_regex:match(str)
 	if not match then return end
+	-- TODO: could maybe be rewritten with Utils.split?
 	local surrounded = match == "|"
 	local n_cols = surrounded and -1 or 1
-	for _ in string.gmatch(str, "|") do
-		n_cols = n_cols + 1
+	for idx in string.gmatch(str, "()|") do
+		-- Check for escapes
+		local count = -1
+		repeat
+			count = count + 1
+			local tok_idx = idx - count - 1
+		until string.sub(str, tok_idx, tok_idx) ~= "\\"
+		if count % 2 == 0 then
+			n_cols = n_cols + 1
+		end
 	end
 	local is_header_separator = is_table_header_separator:match(str)
 	return {
@@ -138,7 +147,7 @@ function Table.get_table_info(lines, table_location)
 	local initial_split_index = surrounded and 2 or 1
 	local final_split_index = initial_split_index + table_location.n_cols - 1
 
-	local alignment_strings = Utils.split(lines[line1 + 1], "|")
+	local alignment_strings = Utils.split(lines[line1 + 1], "|", "\\")
 	local alignments = { }
 	for i=initial_split_index, final_split_index do
 		local alignment = Table.get_alignment(alignment_strings[i])
@@ -149,7 +158,7 @@ function Table.get_table_info(lines, table_location)
 	local rows = { }
 	for i=line1, line2 do
 		local row = { }
-		local data, pipe_positions = Utils.split(string.match(lines[i], "^(.*)\n$"), "|")
+		local data, pipe_positions = Utils.split(string.match(lines[i], "^(.*)\n$"), "|", "\\")
 		for j=initial_split_index, final_split_index do
 			local col = j - initial_split_index + 1
 			local text, trim_start, trim_end = Utils.trim(data[j])

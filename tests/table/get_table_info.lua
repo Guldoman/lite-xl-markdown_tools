@@ -395,4 +395,44 @@ cellç|cell€|cell£
 	return true
 end)
 
+get_table_info_tests:add_test("Surrounded table with escaped pipes", function()
+	local doc = Doc()
+	doc:text_input([[
+|ce\|1|ce\|2|ce\|3|
+|-----|-----|-----|
+|ce\|4|ce\|5|ce\|6|
+|ce\|7|ce\|8|ce\|9|
+]])
+	local t_loc = assert(Table.is_table(doc.lines, 1))
+	local t_info = assert(Table.get_table_info(doc.lines, t_loc))
+
+	-- t_info should keep every field of t_loc
+	for k, v in pairs(t_loc) do
+		assert(t_info[k] == v)
+	end
+
+	local n = 1
+	for i, row in ipairs(t_info.rows) do
+		for j, cell in ipairs(row) do
+			if i ~= 2 then
+				assert(cell.text == string.format([[ce\|%d]], n), cell.text)
+				n = n + 1
+			else
+				assert(cell.text == string.format("-----", n))
+			end
+			assert(cell.cell_start == (j-1) * (#("cell0") + 1) + 2)
+			assert(cell.offset_start == 0)
+			assert(cell.offset_end == 0)
+		end
+	end
+	assert(n == 9 + 1, "Wrong number of cells")
+	assert(t_info.alignments[1] == "left")
+	assert(t_info.alignments[2] == "left")
+	assert(t_info.alignments[3] == "left")
+	assert(t_info.max_lengths[1] == 5)
+	assert(t_info.max_lengths[2] == 5)
+	assert(t_info.max_lengths[3] == 5)
+	return true
+end)
+
 return get_table_info_tests
