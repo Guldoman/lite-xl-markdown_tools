@@ -149,7 +149,7 @@ function Table.get_table_info(lines, table_location)
 	local rows = { }
 	for i=line1, line2 do
 		local row = { }
-		local data, pipe_positions = Utils.split(lines[i], "|")
+		local data, pipe_positions = Utils.split(string.match(lines[i], "^(.*)\n$"), "|")
 		for j=initial_split_index, final_split_index do
 			local col = j - initial_split_index + 1
 			local text, trim_start, trim_end = Utils.trim(data[j])

@@ -7,7 +7,7 @@ function Utils.split(str, token)
 	repeat
 		local initial, final = string.find(str, token, index, true)
 		if not initial then
-			final = #str
+			final = #str + 1
 		else
 			table.insert(indexes, final)
 		end
