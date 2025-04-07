@@ -8,6 +8,8 @@ local config = require "core.config"
 
 local DocView = require "core.docview"
 
+local Utils = require "plugins.markdown_tools.utils"
+
 local MarkdownTools = {}
 
 config.plugins.markdown_tools = common.merge({
@@ -305,5 +307,71 @@ command.map["doc:delete"].perform = function(dv, ...)
 	format_if_needed(dv.doc)
 	return table.unpack(res)
 end
+
+
+local last_test = { } -- cheap cache
+local function is_view_supported_and_clipboard_has_table()
+	local res, dv = MarkdownTools.is_view_supported()
+	if not res or not dv then return false end
+	local clip = system.get_clipboard()
+	if last_test[clip] then
+		return true, dv, last_test[clip]
+	end
+	last_test = { } -- clear cache
+	local lines = Utils.split(clip, PLATFORM == "Windows" and "\r\n" or "\n")
+	if #lines < 2 then -- not enough rows to form an actual table
+		return false
+	end
+	local rows = { }
+	local n_cols
+	local started_table = false
+	local finished_table = false
+	for _, line in ipairs(lines) do
+		if #line == 0 then
+			if not started_table then
+				goto continue
+			end
+			if not finished_table then
+				finished_table = true
+				goto continue
+			end
+		end
+		started_table = true
+		local cells = Utils.split(line, "\t")
+		if #cells == 0 then
+			return false
+		end
+		if not n_cols then
+			n_cols = #cells
+		end
+		if #cells > 0 and finished_table then
+			return false
+		end
+		if #cells ~= n_cols then
+			return false
+		end
+		table.insert(rows, cells)
+		::continue::
+	end
+	last_test[clip] = rows
+	return true, dv, rows
+end
+
+command.add(is_view_supported_and_clipboard_has_table, {
+	["markdown-tools:paste-table"] = function(dv, rows)
+		local text = { }
+		for i, row in ipairs(rows) do
+			table.insert(text, string.format("|%s|", table.concat(row, "|")))
+			if i == 1 then
+				table.insert(text, string.format("|%s|", string.rep("---", #row, "|")))
+			end
+		end
+		dv.doc:text_input(table.concat(text, "\n"))
+	end
+})
+
+keymap.add({
+	["ctrl+v"] = "markdown-tools:paste-table",
+})
 
 return MarkdownTools
